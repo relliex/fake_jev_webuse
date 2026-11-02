@@ -1,0 +1,117 @@
+/**
+ * Lite-JEV: Content Script Styles
+ * Micro Candidate Badges & High-Tech Spotlight
+ */
+
+#lite-jev-overlay-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2147483640;
+  overflow: visible;
+}
+
+/* Candidate box highlighting */
+.lite-jev-candidate-box {
+  position: absolute;
+  border: 1.5px dashed rgba(56, 189, 248, 0.45);
+  background-color: rgba(56, 189, 248, 0.05);
+  border-radius: 4px;
+  pointer-events: none;
+  box-sizing: border-box;
+  transition: all 0.15s ease-out;
+}
+
+.lite-jev-candidate-badge {
+  position: absolute;
+  top: -9px;
+  left: -2px;
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #ffffff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 2147483645;
+  user-select: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.lite-jev-candidate-badge:hover {
+  transform: scale(1.15);
+  background: linear-gradient(135deg, #38bdf8, #60a5fa);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+/* Focused / Hovered Spotlight on the target element */
+#lite-jev-spotlight {
+  position: absolute;
+  border: 2px solid #38bdf8;
+  border-radius: 6px;
+  background-color: rgba(56, 189, 248, 0.18);
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45), 0 0 20px rgba(56, 189, 248, 0.8);
+  pointer-events: none;
+  box-sizing: border-box;
+  z-index: 2147483646;
+  animation: lite-jev-pulse 1.4s infinite alternate;
+}
+
+#lite-jev-spotlight-label {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  background: #0f172a;
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #0284c7;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Action Execution Flash */
+.lite-jev-action-flash {
+  position: absolute;
+  border: 3px solid #10b981;
+  background-color: rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2147483647;
+  animation: lite-jev-flash 0.5s ease-out forwards;
+}
+
+@keyframes lite-jev-pulse {
+  0% {
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.4), 0 0 12px rgba(56, 189, 248, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.5), 0 0 24px rgba(56, 189, 248, 1);
+  }
+}
+
+@keyframes lite-jev-flash {
+  0% {
+    opacity: 1;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}

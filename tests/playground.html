@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lite-JEV 智能演练控制台 (Playground)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #0b1120; color: #f8fafc; padding: 24px; }
+    .container { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+    header { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .brand-title { font-size: 20px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
+    .nav-links { display: flex; gap: 10px; }
+    .nav-link { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); color: #38bdf8; text-decoration: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+    .nav-link:hover { background: rgba(56, 189, 248, 0.2); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .card-title { font-size: 16px; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 12px; color: #94a3b8; }
+    input, select, textarea { background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 10px 12px; color: #f8fafc; font-size: 13px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #38bdf8; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .btn { padding: 9px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #0284c7; color: white; }
+    .btn-primary:hover { background: #0369a1; }
+    .btn-success { background: #059669; color: white; }
+    .btn-success:hover { background: #047857; }
+    .btn-warning { background: #d97706; color: white; }
+    .btn-warning:hover { background: #b45309; }
+    .btn-outline { background: transparent; border: 1px solid #64748b; color: #cbd5e1; }
+    .btn-outline:hover { background: #334155; }
+    .toast-box { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; display: none; }
+    .event-log-card { background: #131c2e; border: 1px solid #1e293b; border-radius: 8px; padding: 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: #94a3b8; }
+    .log-item { color: #38bdf8; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand-title">
+        <span>🚀</span>
+        <span>SkyMall 智能演练中心 (Lite-JEV Playground)</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#orders" id="nav-orders" class="nav-link" onclick="logEvent('点击导航: 订单管理'); return false;">📦 我的订单</a>
+        <a href="#cart" id="nav-cart" class="nav-link" onclick="logEvent('点击导航: 购物车'); return false;">🛒 购物车 (2)</a>
+        <a href="#profile" id="nav-profile" class="nav-link" onclick="logEvent('点击导航: 个人中心'); return false;">👤 账户设置</a>
+      </nav>
+    </header>
+
+    <div id="action-toast" class="toast-box"></div>
+
+    <div class="grid">
+      <!-- Section 1: Travel Search -->
+      <section class="card">
+        <h2 class="card-title">✈️ 智能差旅与机票预订</h2>
+        <div class="form-group">
+          <label for="departure-city">出发城市</label>
+          <input type="text" id="departure-city" placeholder="例如：北京 (PEK)" />
+        </div>
+        <div class="form-group">
+          <label for="destination-city">目的城市</label>
+          <input type="text" id="destination-city" placeholder="例如：东京 (HND)" />
+        </div>
+        <div class="form-group">
+          <label for="cabin-class">舱位等级</label>
+          <select id="cabin-class">
+            <option value="economy">经济舱 (Economy)</option>
+            <option value="business">商务舱 (Business)</option>
+            <option value="first">头等舱 (First)</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-search-flights" onclick="handleFlightSearch()">🔍 立即搜索航班</button>
+          <button class="btn btn-outline" id="btn-reset-flights" onclick="handleResetFlight()">🔄 重置条件</button>
+        </div>
+      </section>
+
+      <!-- Section 2: Product Search & Support -->
+      <section class="card">
+        <h2 class="card-title">🛍️ 智慧电商与即时工单</h2>
+        <div class="form-group">
+          <label for="product-keyword">商品检索</label>
+          <input type="search" id="product-keyword" placeholder="搜索手机、显卡、数码配件..." />
+        </div>
+        <div class="form-group">
+          <label for="service-memo">售后及发票备注</label>
+          <textarea id="service-memo" rows="2" placeholder="填写开票公司抬头或配送说明..."></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-success" id="btn-search-product" onclick="handleProductSearch()">🔎 搜索商城商品</button>
+          <button class="btn btn-warning" id="btn-claim-coupon" onclick="logEvent('成功领取: 满1000减150专享折扣券')">🎟️ 一键领取满减券</button>
+          <button class="btn btn-outline" id="btn-live-chat" onclick="logEvent('已连接: 在线客服客服小航')">💬 在线客服咨询</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Live Event Log -->
+    <div class="event-log-card">
+      <div><strong>📟 页面真实事件监听器 (Real-time Event Logger):</strong></div>
+      <div id="event-log-container">
+        <div class="log-item">系统已就绪，等待 Lite-JEV 浏览器操作...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function logEvent(msg) {
+      const toast = document.getElementById("action-toast");
+      toast.style.display = "block";
+      toast.textContent = "⚡ " + msg;
+
+      const logContainer = document.getElementById("event-log-container");
+      const item = document.createElement("div");
+      item.className = "log-item";
+      item.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logContainer.prepend(item);
+
+      setTimeout(() => { toast.style.display = "none"; }, 3500);
+    }
+
+    function handleFlightSearch() {
+      const dep = document.getElementById("departure-city").value.trim() || "未填写";
+      const dest = document.getElementById("destination-city").value.trim() || "未填写";
+      const cabin = document.getElementById("cabin-class").value;
+      logEvent(`已提交机票检索: ${dep} ✈️ ${dest} (舱位: ${cabin})`);
+    }
+
+    function handleResetFlight() {
+      document.getElementById("departure-city").value = "";
+      document.getElementById("destination-city").value = "";
+      logEvent("差旅表单已重置");
+    }
+
+    function handleProductSearch() {
+      const kw = document.getElementById("product-keyword").value.trim() || "全部商品";
+      logEvent(`商城关键词搜索已触发: "${kw}"`);
+    }
+  </script>
+</body>
+</html>

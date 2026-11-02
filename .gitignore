@@ -1,0 +1,23 @@
+# Runtime & Audit Logs (Contains user queries and runtime prompts)
+logs/
+*.log
+*.jsonl
+
+# Environment & Secret files
+.env
+.env.*
+*.key
+*.pem
+
+# Dependencies & Build
+node_modules/
+dist/
+build/
+
+# Editor & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak

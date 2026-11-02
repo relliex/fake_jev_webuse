@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lite-JEV Zero-CoT 极速控制台</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <div class="panel-container">
+    <!-- Top Header -->
+    <header class="panel-header">
+      <div class="header-brand">
+        <span class="brand-icon">⚡</span>
+        <div>
+          <h1 class="brand-title">Lite-JEV</h1>
+          <span class="brand-subtitle">Zero-CoT 极速浏览器操作引擎</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-open-audit" class="icon-btn" title="查看真实大模型 Prompt 与原始 API 响应审计日志">🔍 审计</button>
+        <button id="btn-export-log" class="icon-btn" title="导出完整决策日志文件 (lite_jev_audit.log)">📥 导出Log</button>
+        <button id="btn-open-settings" class="icon-btn" title="配置 API 与模型参数">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Speed / Latency Metric Cards -->
+    <section class="metric-grid">
+      <div class="metric-card">
+        <span class="metric-label">API 响应耗时</span>
+        <span id="metric-latency" class="metric-value text-cyan">-- ms</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">首字时间 TTFT</span>
+        <span id="metric-ttft" class="metric-value text-blue">-- ms</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">输出 Tokens</span>
+        <span id="metric-tokens" class="metric-value text-emerald">-- tok</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">当前运行模式</span>
+        <span id="metric-mode" class="metric-badge">⚡ Zero-CoT</span>
+      </div>
+    </section>
+
+    <!-- Task Input & Controls -->
+    <section class="task-section">
+      <div class="task-input-wrapper">
+        <textarea
+          id="task-input"
+          rows="2"
+          placeholder="输入浏览器操作目标，例如：在差旅预订中搜索去东京的航班并提交"
+        ></textarea>
+      </div>
+
+      <!-- Quick presets -->
+      <div class="preset-chips">
+        <button class="chip" data-task="在出发城市输入北京，在目的城市输入东京，并点击立即搜索航班">✈️ 搜索差旅航班</button>
+        <button class="chip" data-task="在商品搜索框中输入显卡，并点击搜索商品">🛍️ 搜索商城商品</button>
+        <button class="chip" data-task="点击一键领取满减券">🎟️ 领取优惠券</button>
+      </div>
+
+      <div class="control-row">
+        <button id="btn-run" class="btn btn-primary">
+          <span class="btn-icon">🚀</span> 极速运行
+        </button>
+        <button id="btn-pause" class="btn btn-secondary" disabled>
+          <span class="btn-icon">⏸️</span> 暂停
+        </button>
+        <button id="btn-stop" class="btn btn-danger" disabled>
+          <span class="btn-icon">⏹️</span> 停止
+        </button>
+      </div>
+    </section>
+
+    <!-- Live Status Banner -->
+    <div id="status-banner" class="status-banner">
+      <span class="status-dot"></span>
+      <span id="status-text">准备就绪，随时可执行任务</span>
+    </div>
+
+    <!-- Agent Toolset & Perception Harness Banner -->
+    <div class="harness-bar">
+      <div class="harness-title">🛠️ Agent 工具箱与环境感知 Harness</div>
+      <div class="harness-pills">
+        <span class="tool-pill" title="直接导航至任意 URL">🌐 GOTO</span>
+        <span class="tool-pill" title="精准点击控件">🖱️ CLICK</span>
+        <span class="tool-pill" title="填入内容并提交">✏️ TYPE</span>
+        <span class="tool-pill" title="清空并重填">🧹 CLEAR</span>
+        <span class="tool-pill" title="键盘按键操作">⌨️ PRESS</span>
+        <span class="tool-pill" title="视口平滑滚动">📜 SCROLL</span>
+        <span class="tool-pill" title="悬浮激活下拉菜单">🎯 HOVER</span>
+        <span class="tool-pill" title="清退弹窗与遮罩层">🚪 CLOSE_MODAL</span>
+        <span class="tool-pill" title="浏览器后退">⬅️ GO_BACK</span>
+      </div>
+    </div>
+
+    <!-- System-2 Intent Plan & Active Sub-goal Banner -->
+    <section id="plan-section" class="plan-section hidden">
+      <div class="plan-header">
+        <span class="plan-title">🧠 大脑深度拆解计划看板 (System-2 Plan)</span>
+        <span id="plan-timer" class="plan-timer"></span>
+      </div>
+      <div id="plan-list" class="plan-list"></div>
+      <div class="active-subgoal-banner">
+        <span class="subgoal-tag">当前下发肌肉记忆指令:</span>
+        <span id="active-subgoal-text" class="subgoal-text">等待发布...</span>
+      </div>
+    </section>
+
+    <!-- Interactive Elements Pool -->
+    <section class="pool-section">
+      <div class="section-title-row">
+        <h2>
+          <span>🎯 当前视口可交互候选</span>
+          <span id="element-count-badge" class="count-badge">0</span>
+        </h2>
+        <div class="title-actions">
+          <button id="btn-toggle-badges" class="text-btn" title="显示或隐藏网页上的 E1..En 浮动角标">隐藏角标</button>
+          <button id="btn-refresh-scan" class="text-btn" title="重新感知当前网页元素">🔄 刷新</button>
+        </div>
+      </div>
+      <div id="elements-list" class="elements-list">
+        <div class="empty-state">正在扫描当前网页组件...</div>
+      </div>
+    </section>
+
+    <!-- Execution Trajectory Log -->
+    <section class="log-section">
+      <div class="section-title-row">
+        <h2>📜 决策与操作轨迹</h2>
+        <div class="title-actions">
+          <button id="btn-download-audit" class="text-btn" title="导出当前决策日志文件">📥 导出Log</button>
+          <button id="btn-clear-log" class="text-btn">清空</button>
+        </div>
+      </div>
+      <div id="trajectory-list" class="trajectory-list">
+        <div class="empty-state">尚未开始执行</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Settings Drawer / Modal -->
+  <div id="settings-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ Lite-JEV 引擎配置</h3>
+        <button id="btn-close-settings" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-item">
+          <label>推理引擎供应商 (Provider)</label>
+          <select id="setting-provider">
+            <option value="mock">⚡ 本地极速基准模拟器 (无需 API Key, 毫秒响应)</option>
+            <option value="gemini">🌟 Google Gemini API (原生支持 Thinking 关闭)</option>
+            <option value="openai">🤖 OpenAI 兼容接口 (DeepSeek / Qwen / SiliconFlow / Local)</option>
+          </select>
+        </div>
+
+        <div id="wrapper-api-key" class="form-item">
+          <label>API Key</label>
+          <input type="password" id="setting-api-key" placeholder="例如：AIzaSy... 或 sk-..." />
+        </div>
+
+        <div id="wrapper-model" class="form-item">
+          <label>模型名称 (Model)</label>
+          <input type="text" id="setting-model" value="deepseek-v4.1-flash" placeholder="deepseek-v4.1-flash / qwen3.8-flash" />
+          <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;">
+            <button type="button" class="chip-model-preset text-btn" data-model="deepseek-v4.1-flash" style="font-size:10px; background:rgba(56,189,248,0.12); padding:2px 6px; border-radius:4px; color:#38bdf8; border:1px solid rgba(56,189,248,0.25);">⚡ deepseek-v4.1-flash</button>
+            <button type="button" class="chip-model-preset text-btn" data-model="qwen3.8-flash" style="font-size:10px; background:rgba(56,189,248,0.12); padding:2px 6px; border-radius:4px; color:#38bdf8; border:1px solid rgba(56,189,248,0.25);">⚡ qwen3.8-flash</button>
+            <button type="button" class="chip-model-preset text-btn" data-model="qwen2.5:1.5b" data-base-url="http://localhost:11434/v1" data-api-key="ollama" style="font-size:10px; background:rgba(34,197,94,0.12); padding:2px 6px; border-radius:4px; color:#22c55e; border:1px solid rgba(34,197,94,0.25);" title="本地部署轻量模型，无网络延迟，实测 70ms~150ms 极速">🚀 本地 Ollama (70ms实测)</button>
+            <button type="button" class="chip-model-preset text-btn" data-model="gemini-2.0-flash" style="font-size:10px; background:rgba(148,163,184,0.12); padding:2px 6px; border-radius:4px; color:#94a3b8; border:1px solid rgba(148,163,184,0.25);">gemini-2.0-flash</button>
+          </div>
+        </div>
+
+        <div id="wrapper-base-url" class="form-item">
+          <label>Base URL (OpenAI 兼容协议)</label>
+          <input type="text" id="setting-base-url" value="https://api.openai.com/v1" placeholder="https://api.deepseek.com/v1" />
+        </div>
+
+        <div class="form-item-checkbox">
+          <label class="switch-container">
+            <input type="checkbox" id="setting-zero-cot" checked />
+            <span class="switch-slider"></span>
+          </label>
+          <div>
+            <strong>🔥 启用 Zero-CoT 极速模式 (严格限制格式 + 关闭思考)</strong>
+            <p class="field-hint">关闭模型思维链，输出格式严格限定为单行 JEV 原语代码。不设狭隘 Token 限制，杜绝截断卡死，模型自发极速收敛！</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="btn btn-primary" style="width: 100%;">保存并应用配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real LLM Audit Inspector Modal (100% Transparent Prompt & Raw API Response) -->
+  <div id="audit-modal" class="modal-backdrop hidden">
+    <div class="modal-card modal-card-large">
+      <div class="modal-header">
+        <h3>🔍 真实大模型决策审计日志 (Audit Inspector)</h3>
+        <div style="display:flex; gap:8px;">
+          <button id="btn-export-log-modal" class="btn btn-secondary btn-sm">📥 导出 .log 文件</button>
+          <button id="btn-close-audit" class="icon-btn">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p class="field-hint" style="margin-bottom: 8px;">
+          以下记录真实发给云端大模型 API 的<strong>完整上下文 Prompt（包含所有候选元素）</strong>及<strong>大模型未经任何处理的原始 HTTP 返回响应体 (Raw Response)</strong>。严禁任何隐式 Fallback 或黑盒打分！
+        </p>
+        <div id="audit-log-viewer" class="audit-log-viewer">
+          <div class="empty-state">暂无审计日志，请先运行任务...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="decision_logger.js"></script>
+  <script src="zero_cot_engine.js"></script>
+  <script src="agent_controller.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
