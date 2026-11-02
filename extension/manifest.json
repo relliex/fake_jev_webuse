@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Lite-JEV: Zero-CoT 极速浏览器操作插件",
+  "name": "Fake-JEV WebUse: 极速浏览器操作插件",
   "version": "1.0.0",
-  "description": "基于原版模型 API + 严格 Harness + 零思考 (Zero-CoT) 实现毫秒级端到端网页自主操作",
+  "description": "基于通用大模型 + 外部工程护栏复现 Jev 只做决策不生成文本的高频极速网页操作",
   "permissions": [
     "activeTab",
     "tabs",
@@ -23,7 +23,7 @@
     "default_path": "sidepanel/index.html"
   },
   "action": {
-    "default_title": "打开 Lite-JEV 控制台"
+    "default_title": "打开 Fake-JEV 控制台"
   },
   "content_scripts": [
     {
